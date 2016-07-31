@@ -79,6 +79,8 @@ export default function watch ( rollup, options ) {
 				let initial = !watching;
 				let opts = assign( {}, options, cache ? { cache } : {});
 
+				delete opts.buildSelf;
+
 				emitter.emit( 'event', { code: 'BUILD_START' });
 
 				building = true;
@@ -102,6 +104,16 @@ export default function watch ( rollup, options ) {
 								if ( watcher.fileExists ) filewatchers.set( id, watcher );
 							}
 						});
+
+						if ( options.buildSelf ) {
+							return new Promise((resolve) => {
+								emitter.emit( 'event', {
+									code: 'BUILD_SELF',
+									bundle,
+									done: resolve
+								});
+							});
+						}
 
 						if ( options.targets ) {
 							return sequence( options.targets, target => {
